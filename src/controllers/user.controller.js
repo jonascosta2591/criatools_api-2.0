@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import sendEmail from "../services/emailService.js";
 
 import dotenv from "dotenv";
 
@@ -21,8 +22,9 @@ class User {
       },
     });
 
-    if (users.length === 0)
+    if (users.length === 0) {
       return this.res.status(404).send("email ou senha invalidos");
+    }
 
     const payload = { uuid: users.uuid, uuid_grupo: users.uuid_grupo };
 
@@ -30,25 +32,45 @@ class User {
       expiresIn: process.env.JWT_EXPIRATION,
     });
 
-    return this.res.status(200).send([...users, token]);
+    return this.res.status(200).send([
+      {
+        uuid: users[0].uuid,
+        nome: users[0].nome,
+        email: users[0].email,
+        uuid_grupo: users[0].uuid_grupo,
+        token,
+      },
+    ]);
   }
   async register() {
     try {
       try {
-        const newUser = await prisma.user.create({
-          data: {
-            nome: "Jane Doe",
-            email: "janedoe1@example.com",
-            senha: "Jane Doe",
-            plano: "mensal",
-            liberado: 1,
-            uuid_grupo: "dscsdcsdcscddscsc",
-            id_subscription: "dscsdcsdcscddscsc",
-            customer_id: "dscsdcsdcscddscsc",
-            asaas_data: "dscsdcsdcscddscsc",
-          },
+        const user = {
+          email: "jonascosta0299@gmail.com",
+          name: "jonas",
+        };
+
+        await sendEmail({
+          to: user.email,
+          subject: "Bem-vindo ao Meu App!",
+          templateName: "paymentCreated.html",
+          context: { name: user.name },
         });
-        return this.res.status(200).send(newUser);
+
+        // const newUser = await prisma.user.create({
+        //   data: {
+        //     nome: "Jane Doe",
+        //     email: "janedoe1@example.com",
+        //     senha: "Jane Doe",
+        //     plano: "mensal",
+        //     liberado: 1,
+        //     uuid_grupo: "dscsdcsdcscddscsc",
+        //     id_subscription: "dscsdcsdcscddscsc",
+        //     customer_id: "dscsdcsdcscddscsc",
+        //     asaas_data: "dscsdcsdcscddscsc",
+        //   },
+        // });
+        return this.res.status(200).send("Conta criada");
       } catch (err) {
         return this.res.status(200).send("email já cadastrado");
       }

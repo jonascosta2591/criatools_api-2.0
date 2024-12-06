@@ -9,8 +9,8 @@ router.get("/get_chat_gpt_session/:uuid_grupo", authMiddleware, (req, res) => {
   return new iasController(req, res).getChatgptCookies();
 });
 
-//Rota para atualizar os cookies do chatgpt
-router.get("/update_chat_gpt_session", (req, res) => {
+//Rota para atualizar os cookies do chatgpt //Rota disponivel somente para admins
+router.get("/update_chat_gpt_session", authMiddleware, (req, res) => {
   return new iasController(req, res).updateChatgptCookies();
 });
 
